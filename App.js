@@ -1,6 +1,10 @@
 const fs = require("fs");
 const mysql = require("mysql");
 const inquirer = require("inquirer");
+const table = require('console.table');
+const add = require('./assets/add');
+const update = require('./assets/update');
+const view = require('./assets/view');
 
 const connection = mysql.createConnection({
   host: "localhost",
