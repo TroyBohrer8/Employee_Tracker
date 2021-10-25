@@ -16,10 +16,10 @@ const connection = mysql.createConnection({
 
 connection.connect(function (err) {
   if (err) throw err;
-  runApp();
+  exports.start();;
 });
 
-function runApp() {
+exports.start = () => {
   inquirer
     .prompt([
       {
