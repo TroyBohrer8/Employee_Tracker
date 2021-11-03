@@ -4,7 +4,7 @@ VALUES (1, "Plumbing"),
     (3, "Electrician"),
     (4, "Labor"),
     (5, "Managment");
-INSERT INTO role (role_id, title, salary, dept_id)
+INSERT INTO roles (role_id, title, salary, dept_id)
 VALUES (01, "Plumber", 90000, 1),
     (02, "Carpenter", 60000, 2),
     (03, "Electrician", 100000, 3),
@@ -17,6 +17,10 @@ VALUES (001, "John", "Smith", 01, NULL),
     (004, "Carlos", "Sanchez", 04, NULL),
     (005, "Brandon", "Mayhew", 05, 001);
 
+DESCRIBE department;
+DESCRIBE roles;
+DESCRIBE employee;
+
 SELECT * FROM department;
 SELECT * FROM employee;
-SELECT * FROM role;
+SELECT * FROM roles;

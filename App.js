@@ -10,9 +10,9 @@ const db = mysql.createConnection({
   database: "employeetracker_db",
 });
 
-db.connect(function (err) {
-  if (err) throw err;
-});
+// db.connect(function (err) {
+//   if (err) throw err;
+// });
 
 function homePage() {
   inquirer
@@ -67,9 +67,27 @@ function exit() {
   process.exit();
 }
 
+function viewEmployees() {
+  db.query("SELECT * FROM employee", function (err, res) {
+    // if (err) throw err;
+
+    console.log(`
+  
+    --------EMPLOYEES---------------
+  `);
+    console.table(res);
+    console.log(`
+  ----------END EMPLOYEES-------------
+  
+  ---MAIN MENU---
+  `);
+    homePage();
+  });
+}
+
 function viewDepartments() {
   db.query("SELECT * FROM department", function (err, res) {
-    if (err) throw err;
+    // if (err) throw err;
     console.log(`
   
   --------DEPARTMENTS---------------
@@ -88,7 +106,7 @@ function viewRoles() {
   db.query(
     "SELECT department.name AS Department, role.title AS Role, role.salary AS Salary FROM role JOIN department ON role.department_id = department.id;",
     function (err, res) {
-      if (err) throw err;
+      // if (err) throw err;
       console.log(`
   
   ------------ROLES---------------
@@ -102,62 +120,6 @@ function viewRoles() {
       homePage();
     }
   );
-}
-
-function viewEmployees() {
-  db.query("SELECT * FROM employee", function (err, res) {
-    if (err) throw err;
-
-    console.log(`
-  
-    --------EMPLOYEES---------------
-  `);
-    console.table(res);
-    console.log(`
-  ----------END EMPLOYEES-------------
-  
-  ---MAIN MENU---
-  `);
-    homePage();
-  });
-}
-
-function updateEmployee() {
-  console.log("update");
-}
-
-function addDepartment() {
-  {
-    inquirer
-      .prompt([
-        {
-          name: "department",
-          type: "input",
-          message: "Enter the new department name: ",
-        },
-      ])
-      .then(function (data) {
-        db.query(
-          "INSERT INTO department SET ?",
-          {
-            name: data.department,
-          },
-          function (err) {
-            console.log(`
-  YOUR NEW DEPARTMENT AS BEEN ADDED!
-  
-  ---MAIN MENU---
-  `);
-            console.table(data);
-            homePage();
-          }
-        );
-      });
-  }
-}
-
-function addRole() {
-  console.log("add.r");
 }
 
 function addEmployee() {
@@ -209,12 +171,12 @@ function addEmployee() {
 }
 
 function selectRole() {
-  db.query("SELECT title FROM role", function (err, res) {
+  db.query("SELECT title FROM roles", function (err, res) {
     for (var i = 0; i < res.length; i++) {
-      showRoles.push(res[i].title);
+      allRoles.push(res[i].title);
     }
   });
-  return showRoles;
+  return allRoles;
 }
 
 function selectManager() {
@@ -230,6 +192,146 @@ function selectManager() {
     }
   );
   return showManagers;
+}
+
+function addDepartment() {
+  {
+    inquirer
+      .prompt([
+        {
+          name: "department",
+          type: "input",
+          message: "Enter the new department name: ",
+        },
+      ])
+      .then(function (data) {
+        db.query(
+          "INSERT INTO department SET ?",
+          {
+            name: data.department,
+          },
+          function (err) {
+            console.log(`
+  YOUR NEW DEPARTMENT AS BEEN ADDED!
+  
+  ---MAIN MENU---
+  `);
+            console.table(data);
+            homePage();
+          }
+        );
+      });
+  }
+}
+
+function addRole() {
+  db.query("SELECT id, name FROM department", function (err, res) {
+    // if (err) throw err;
+    var departmentChoices = res.map(function (department) {
+      return department.name;
+    });
+
+    const roleQuestions = [
+      {
+        name: "Title",
+        type: "input",
+        message: "Enter the role you'd like to add: ",
+      },
+      {
+        name: "Salary",
+        type: "input",
+        message: "What is the salary of this role?",
+      },
+      {
+        name: "Department",
+        type: "list",
+        message: "Which department does this role belong to?",
+        choices: departmentChoices,
+      },
+    ];
+
+    if (res.length === 0) {
+      console.error("Please enter a department!");
+      return addRole();
+    }
+
+    inquirer.prompt(roleQuestions).then(function (roleAnswers) {
+      var departmentId;
+      for (var i = 0; i < res.length; i++) {
+        if (roleAnswers.departmentChoices === res[i].name) {
+          departmentId = res[i].id;
+          break;
+        }
+      }
+
+      db.query(
+        "INSERT INTO role SET ?",
+        {
+          title: roleAnswers.Title,
+          salary: roleAnswers.Salary,
+          department_id: departmentId,
+        },
+        function (err, data) {
+          if (err) throw err;
+
+          console.info(`
+          
+          NEW ROLE HAS BEEN ADDED!
+          
+          ---MAIN MENU---
+          `);
+          homePage();
+        }
+      );
+    });
+  });
+}
+
+function updateEmployee() {
+  db.query('SELECT * FROM employee JOIN role ON employee.role_id = role.id;', function (err, res) {
+    if (err) throw err;
+    inquirer.prompt([
+      {
+        type: "list",
+        name: "updateId",
+        message: "Select an employee to update: ",
+        choices: function () {
+          var allEmployees=[]
+          for (var i=0; i<res.length; i++) {
+            allEmployees.push(`${res[i].id} - ${res[i].first_name} ${res[i].last_name}`)
+          }
+          return allEmployees
+        },
+      },
+     
+      {
+        name: "role",
+        type: 'list',
+        message: "Please select an updated role.",
+        choices: selectRole()
+      },
+      {
+        name: "manager",
+        type: 'list',
+        message: "Please select a manager",
+        choices: selectManager()
+      },
+   
+    ]).then(function (data) {
+      console.log(data.manager)
+      var managerId =selectRole().indexOf(data.manager)
+      db.query('UPDATE employee SET WHERE ?',
+        {
+          id: data.updateId,
+          role_id: data.roleId,
+          manager_id: managerId
+          
+        }, function (err) {
+          console.table(data)
+          homePage()
+        })
+    })
+  });
 }
 
 homePage();
