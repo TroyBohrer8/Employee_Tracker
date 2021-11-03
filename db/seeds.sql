@@ -1,9 +1,9 @@
 INSERT INTO department (dept_id, dept_name)
-VALUES (1, "Plumber"),
-    (2, "Carpenter"),
+VALUES (1, "Plumbing"),
+    (2, "Carpentry"),
     (3, "Electrician"),
-    (4, "Laborer"),
-    (5, "Project Managment");
+    (4, "Labor"),
+    (5, "Managment");
 INSERT INTO role (role_id, title, salary, dept_id)
 VALUES (01, "Plumber", 90000, 1),
     (02, "Carpenter", 60000, 2),

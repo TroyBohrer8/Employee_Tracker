@@ -14,7 +14,7 @@ db.connect(function (err) {
   if (err) throw err;
 });
 
-function startApp() {
+function homePage() {
   inquirer
     .prompt([
       {
@@ -23,38 +23,38 @@ function startApp() {
         message: "What would you like to do?",
         choices: [
           "View all employees",
-          "View all employees by department",
-          "View all employees by manager",
+          "View all departments",
+          "View all employees by role",
           "Add Employee",
-          "Remove Employee",
+          "Add Department",
+          "Add Employee Role",
           "Update Employee Role",
-          "Update Employee Manager",
           "Exit",
         ],
       },
     ])
     .then(function (res) {
       switch (res.choice) {
-        case "View All Departments":
-          viewDepartments();
-          break;
-        case "View All Roles":
-          viewRoles();
-          break;
-        case "View All Employees":
+        case "View all employees":
           viewEmployees();
           break;
-        case "Update Employee":
-          updateEmployee();
+        case "View all departments":
+          viewDepartments();
+          break;
+        case "View all employees by role":
+          viewRoles();
+          break;
+        case "Add Employee":
+          addEmployee();
           break;
         case "Add Department":
           addDepartment();
           break;
-        case "Add Role":
+        case "Add Employee Role":
           addRole();
           break;
-        case "Add Employee":
-          addEmployee();
+        case "Update Employee":
+          updateEmployee();
           break;
         case "Exit":
           exit();
@@ -63,38 +63,173 @@ function startApp() {
 }
 
 function exit() {
-  console.log("You have exited the Employee Tracker app")
+  console.log("You have exited the Employee Tracker app");
   process.exit();
 }
 
 function viewDepartments() {
-  console.log("departments")
+  db.query("SELECT * FROM department", function (err, res) {
+    if (err) throw err;
+    console.log(`
+  
+  --------DEPARTMENTS---------------
+  `);
+    console.table(res);
+    console.log(`
+  -------END DEPARTMENTS---------
+  
+  ---MAIN MENU---
+  `);
+    homePage();
+  });
 }
 
 function viewRoles() {
-  console.log("roles")
+  db.query(
+    "SELECT department.name AS Department, role.title AS Role, role.salary AS Salary FROM role JOIN department ON role.department_id = department.id;",
+    function (err, res) {
+      if (err) throw err;
+      console.log(`
+  
+  ------------ROLES---------------
+  `);
+      console.table(res);
+      console.log(`
+  ----------END ROLES-------------
+  
+  ---MAIN MENU---
+  `);
+      homePage();
+    }
+  );
 }
 
 function viewEmployees() {
-  console.log("employee")
+  db.query("SELECT * FROM employee", function (err, res) {
+    if (err) throw err;
+
+    console.log(`
+  
+    --------EMPLOYEES---------------
+  `);
+    console.table(res);
+    console.log(`
+  ----------END EMPLOYEES-------------
+  
+  ---MAIN MENU---
+  `);
+    homePage();
+  });
 }
 
 function updateEmployee() {
-  console.log("update")
+  console.log("update");
 }
 
 function addDepartment() {
-  console.log("add.d")
+  {
+    inquirer
+      .prompt([
+        {
+          name: "department",
+          type: "input",
+          message: "Enter the new department name: ",
+        },
+      ])
+      .then(function (data) {
+        db.query(
+          "INSERT INTO department SET ?",
+          {
+            name: data.department,
+          },
+          function (err) {
+            console.log(`
+  YOUR NEW DEPARTMENT AS BEEN ADDED!
+  
+  ---MAIN MENU---
+  `);
+            console.table(data);
+            homePage();
+          }
+        );
+      });
+  }
 }
 
 function addRole() {
-  console.log("add.r")
+  console.log("add.r");
 }
 
 function addEmployee() {
-  console.log("add.e")
+  inquirer
+    .prompt([
+      {
+        name: "first_name",
+        type: "input",
+        message: "New employee first name: ",
+      },
+      {
+        name: "last_name",
+        type: "input",
+        message: "New employee last name: ",
+      },
+      {
+        name: "role",
+        type: "list",
+        message: "What is the new employees role?",
+        choices: selectRole(),
+      },
+      {
+        name: "manager",
+        type: "list",
+        message: "Please select a manager.",
+        choices: selectManager(),
+      },
+    ])
+
+    .then(function (data) {
+      var roleId = selectRole().indexOf(data.role) + 1;
+      var managerId = selectManager().indexOf(data.manager) + 1;
+
+      db.query(
+        "INSERT INTO employee SET ?",
+        {
+          first_name: data.first_name,
+          last_name: data.last_name,
+          manager_id: managerId,
+          role_id: roleId,
+        },
+        function (err, res) {
+          if (err) throw err;
+
+          homePage();
+        }
+      );
+    });
 }
 
+function selectRole() {
+  db.query("SELECT title FROM role", function (err, res) {
+    for (var i = 0; i < res.length; i++) {
+      showRoles.push(res[i].title);
+    }
+  });
+  return showRoles;
+}
 
+function selectManager() {
+  db.query(
+    "SELECT * FROM employee WHERE manager_id IS NULL",
+    function (err, res) {
+      if (err) throw err;
+      for (var i = 0; i < res.length; i++) {
+        showManagers.push(
+          `${res[i].id} - ${res[i].first_name} ${res[i].last_name}`
+        );
+      }
+    }
+  );
+  return showManagers;
+}
 
-startApp();
+homePage();
