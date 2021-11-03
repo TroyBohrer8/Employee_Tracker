@@ -1,10 +1,10 @@
 const fs = require("fs");
 const mysql = require("mysql");
 const inquirer = require("inquirer");
-const table = require('console.table');
-const add = require('./assets/add');
-const update = require('./assets/update');
-const view = require('./assets/view');
+const table = require("console.table");
+const add = require("./assets/add");
+const update = require("./assets/update");
+const view = require("./assets/view");
 
 const connection = mysql.createConnection({
   host: "localhost",
@@ -16,7 +16,7 @@ const connection = mysql.createConnection({
 
 connection.connect(function (err) {
   if (err) throw err;
-  exports.start();;
+  exports.start();
 });
 
 exports.start = () => {
@@ -40,7 +40,14 @@ exports.start = () => {
     ])
     .then(function (res) {
       if (res.choice === "View all employees") {
-          view.viewAllEmployees();
+        view.viewAllEmployees();
+      } else if (res.choice === "Add Employee") {
+        add.addEmployee();
+      } else if (res.choice === "Update Employee Role") {
+        update.updateRole();
+      } else if (res.choice === "Exit") {
+        connection.end();
+        return;
       }
     });
-}
+};
