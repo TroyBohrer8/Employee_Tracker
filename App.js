@@ -1,12 +1,8 @@
-const fs = require("fs");
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const table = require("console.table");
-const add = require("./assets/add");
-const update = require("./assets/update");
-const view = require("./assets/view");
 
-const connection = mysql.createConnection({
+const db = mysql.createConnection({
   host: "localhost",
   port: 3001,
   user: "root",
@@ -14,12 +10,11 @@ const connection = mysql.createConnection({
   database: "employeetracker_db",
 });
 
-connection.connect(function (err) {
+db.connect(function (err) {
   if (err) throw err;
-  exports.start();
 });
 
-exports.start = () => {
+function startApp() {
   inquirer
     .prompt([
       {
@@ -39,15 +34,34 @@ exports.start = () => {
       },
     ])
     .then(function (res) {
-      if (res.choice === "View all employees") {
-        view.viewAllEmployees();
-      } else if (res.choice === "Add Employee") {
-        add.addEmployee();
-      } else if (res.choice === "Update Employee Role") {
-        update.updateRole();
-      } else if (res.choice === "Exit") {
-        connection.end();
-        return;
+      switch (res.choice) {
+        case "View All Departments":
+          viewDepartments();
+          break;
+        case "View All Roles":
+          viewRoles();
+          break;
+        case "View All Employees":
+          viewEmployees();
+          break;
+        case "Update Employee":
+          updateEmployee();
+          break;
+        case "Add Department":
+          addDepartment();
+          break;
+        case "Add Role":
+          addRole();
+          break;
+        case "Add Employee":
+          addEmployee();
+          break;
+        case "Exit":
+          exit();
       }
     });
-};
+}
+
+
+
+startApp();
