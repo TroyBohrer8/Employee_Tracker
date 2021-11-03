@@ -68,31 +68,31 @@ function exit() {
 }
 
 function viewDepartments() {
-
+  console.log("departments")
 }
 
 function viewRoles() {
-
+  console.log("roles")
 }
 
 function viewEmployees() {
-
+  console.log("employee")
 }
 
 function updateEmployee() {
-
+  console.log("update")
 }
 
 function addDepartment() {
-
+  console.log("add.d")
 }
 
 function addRole() {
-
+  console.log("add.r")
 }
 
 function addEmployee() {
-  
+  console.log("add.e")
 }
 
 
