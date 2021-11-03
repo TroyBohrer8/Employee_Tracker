@@ -62,6 +62,39 @@ function startApp() {
     });
 }
 
+function exit() {
+  console.log("You have exited the Employee Tracker app")
+  process.exit();
+}
+
+function viewDepartments() {
+
+}
+
+function viewRoles() {
+
+}
+
+function viewEmployees() {
+
+}
+
+function updateEmployee() {
+
+}
+
+function addDepartment() {
+
+}
+
+function addRole() {
+
+}
+
+function addEmployee() {
+  
+}
+
 
 
 startApp();
